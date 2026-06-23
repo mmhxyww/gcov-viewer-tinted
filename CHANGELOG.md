@@ -1,5 +1,9 @@
 ## Unreleased
 
+### Added
+
+- New `gcovViewer.calledLineColor` and `gcovViewer.missedLineColor` settings.
+
 ## 0.6.0 - 2024-07-22
 
 ### Changed

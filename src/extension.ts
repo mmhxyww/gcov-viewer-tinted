@@ -21,8 +21,31 @@ import {
 
 let isShowingDecorations: boolean = false;
 let coverageStatusBarItem: vscode.StatusBarItem;
+let extensionContext: vscode.ExtensionContext;
+const defaultCalledLineColor = "rgba(50, 240, 50, 0.1)";
+const defaultMissedLineColor = "rgba(240, 50, 50, 0.1)";
+let currentCalledColor = defaultCalledLineColor;
+let currentMissedColor = defaultMissedLineColor;
+
+function createLineDecorationType(color: string) {
+  return vscode.window.createTextEditorDecorationType({
+    isWholeLine: true,
+    backgroundColor: color,
+    overviewRulerColor: color,
+    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+  });
+}
+
+let calledLinesDecorationType = createLineDecorationType(
+  defaultCalledLineColor
+);
+let missedLinesDecorationType = createLineDecorationType(
+  defaultMissedLineColor
+);
 
 export function activate(context: vscode.ExtensionContext) {
+  extensionContext = context;
+
   const commands: [string, any][] = [
     ["gcov-viewer.show", COMMAND_showDecorations],
     ["gcov-viewer.hide", COMMAND_hideDecorations],
@@ -49,6 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
     100
   );
   context.subscriptions.push(coverageStatusBarItem);
+  context.subscriptions.push(calledLinesDecorationType, missedLinesDecorationType);
 
   vscode.window.onDidChangeVisibleTextEditors(async (editors) => {
     if (isShowingDecorations) {
@@ -61,25 +85,37 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
   vscode.window.onDidChangeActiveTextEditor(updateStatusBar);
+
+  refreshDecorationTypes();
 }
 
 export function deactivate() {}
 
-const calledLineColor = "rgba(50, 240, 50, 0.1)";
-const calledLinesDecorationType = vscode.window.createTextEditorDecorationType({
-  isWholeLine: true,
-  backgroundColor: calledLineColor,
-  overviewRulerColor: calledLineColor,
-  rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-});
+function getDecorationColors() {
+  const config = vscode.workspace.getConfiguration("gcovViewer");
+  return {
+    called: config.get<string>("calledLineColor", defaultCalledLineColor),
+    missed: config.get<string>("missedLineColor", defaultMissedLineColor),
+  };
+}
 
-const missedLineColor = "rgba(240, 50, 50, 0.1)";
-const missedLinesDecorationType = vscode.window.createTextEditorDecorationType({
-  isWholeLine: true,
-  backgroundColor: missedLineColor,
-  overviewRulerColor: missedLineColor,
-  rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-});
+function refreshDecorationTypes() {
+  const { called, missed } = getDecorationColors();
+  if (called === currentCalledColor && missed === currentMissedColor) {
+    return;
+  }
+
+  calledLinesDecorationType.dispose();
+  missedLinesDecorationType.dispose();
+  currentCalledColor = called;
+  currentMissedColor = missed;
+  calledLinesDecorationType = createLineDecorationType(called);
+  missedLinesDecorationType = createLineDecorationType(missed);
+  extensionContext.subscriptions.push(
+    calledLinesDecorationType,
+    missedLinesDecorationType
+  );
+}
 
 function getWorkspaceFolderConfig(workspaceFolder: vscode.WorkspaceFolder) {
   return vscode.workspace.getConfiguration("gcovViewer", workspaceFolder);
@@ -291,6 +327,7 @@ async function COMMAND_showDecorations() {
   if (!isCoverageDataLoaded()) {
     await reloadGcdaFiles();
   }
+  refreshDecorationTypes();
   await showDecorations();
   updateStatusBar();
 }
