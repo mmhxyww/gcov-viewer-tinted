@@ -1,4 +1,19 @@
-# Gcov Viewer
+# Gcov Viewer Tinted
+
+This repository is a fork of [JacquesLucke/gcov-viewer](https://github.com/JacquesLucke/gcov-viewer).
+The core design and implementation are attributable to the original project and its author.
+
+This fork preserves the upstream command names and behavior, while clearly indicating its derivation for the benefit of users and contributors.
+Its primary enhancement is the ability to configure highlight colors via `settings.json`, enabling alignment with editor themes and accessibility requirements.
+
+For example, add the following to your workspace settings:
+
+```json
+{
+	"gcovViewer.calledLineColor": "rgba(50, 240, 50, 0.15)",
+	"gcovViewer.missedLineColor": "rgba(240, 50, 50, 0.15)"
+}
+```
 
 [Gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html) is a tool you can use in conjunction with GCC to test code coverage in your programs. This extension visualizes the output of gcov in Visual Studio Code. It allows you to see which lines of the program have been executed and how often.
 
@@ -11,6 +26,8 @@
 During compilation, `gcc` will generate a `.gcno` file next to every `.o` file. When you run the program, it will create `.gcda` files in the same location. Those contain information about how often functions and lines have been executed.
 
 This vscode extension uses the `gcov` program to parse these additional files and displays the information on top of your source files. For this to work, it has to find the generated `.gcda` for a given project. Those are usually in your build directory. If the extension does not find them on its own, you have to edit the `gcovViewer.buildDirectories` setting of your workspace folder. The most convenient way to do this is to use the `Gcov Viewer: Select Build Directory` command.
+
+If you are looking for the upstream project, you can find it at [JacquesLucke/gcov-viewer](https://github.com/JacquesLucke/gcov-viewer).
 
 You can also customize the highlight colors through `gcovViewer.calledLineColor` and `gcovViewer.missedLineColor` in your `settings.json`.
 
