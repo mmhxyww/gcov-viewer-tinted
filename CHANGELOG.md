@@ -3,6 +3,7 @@
 ### Added
 
 - New `gcovViewer.calledLineColor` and `gcovViewer.missedLineColor` settings.
+- Document that this repository is a fork of JacquesLucke/gcov-viewer.
 
 ## 0.6.0 - 2024-07-22
 
