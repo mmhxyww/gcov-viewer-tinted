@@ -19,6 +19,7 @@
   "bugs": {
     "url": "https://github.com/mmhxyww/gcov-viewer-tinted/issues"
   },
+  "icon": "images/icon.png",
   "categories": [
     "Other"
   ],
